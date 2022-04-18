@@ -32,6 +32,7 @@ var (
 	}
 
 	IMPLEMENTATION_SLOT = common.HexToHash("0x360894a13ba1a3210667c828492db98dca3e2076cc3735a920a3ca505d382bbc")
+	ZeroAddress         = common.HexToAddress("0x0000000000000000000000000000000000000000")
 )
 
 func Run(config *config.Config) {
@@ -98,11 +99,14 @@ func Run(config *config.Config) {
 	}
 	fmt.Printf("all length:%v\n", allLength)
 
-	for i := startIndex; i < allLength.Int64(); i++ {
+	for i := startIndex; i < allLength.Int64(); {
 		addrs := []common.Address{}
 		pairAddr, _ := factory.AllPairs(nil, big.NewInt(i))
 		pair, _ := NewPancakePair(pairAddr, c)
-
+		if pairAddr == ZeroAddress {
+			fmt.Printf("%v, invalide pair:%v\n", i, pairAddr)
+			continue
+		}
 		fmt.Printf("%v, pair:%v\n", i, pairAddr)
 		token0Addr, _ := pair.Token0(nil)
 		token1Addr, _ := pair.Token1(nil)
@@ -154,6 +158,7 @@ func Run(config *config.Config) {
 		}
 
 		db.Put(LastHandledIndexStoreKey(), big.NewInt(i).Bytes(), nil)
+		i++
 	}
 }
 
